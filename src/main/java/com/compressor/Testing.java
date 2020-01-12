@@ -1,6 +1,7 @@
 package com.compressor;
 
-import me.lemire.integercompression.differential.IntegratedIntCompressor;
+import me.lemire.integercompression.*;
+import me.lemire.integercompression.differential.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,23 +13,52 @@ import java.util.stream.Stream;
 
 public class Testing {
 
+    private static final int CHUNK_SIZE = 16384;
+    
     public static void main(String[] args) throws IOException {
 
         String parameter = args[0];
         int[] data = getArrayFromFile(args[1]);
         String resultFile = args[2];
 
-        IntegratedIntCompressor iic = new IntegratedIntCompressor();
 
-        int[] result;
+        Arrays.parallelSort(data);
+
+        IntegratedIntegerCODEC regularCodec = new IntegratedBinaryPacking();
+        IntegratedVariableByte integratedVariableByte = new IntegratedVariableByte();
+        IntegratedIntegerCODEC lastCodec = new IntegratedComposition(regularCodec, integratedVariableByte);
 
         if (parameter.equals("-c")){
-            result = iic.compress(data);
-        }else {
-            result = iic.uncompress(data);
-        }
+            int[] compressed = new int[data.length];
 
-        writeResultToFile(result, resultFile);
+            IntWrapper inputOffset = new IntWrapper(0);
+            IntWrapper outputOffset = new IntWrapper(0);
+            for (int k = 0; k < data.length / CHUNK_SIZE; ++k){
+                regularCodec.compress(data, inputOffset, CHUNK_SIZE, compressed, outputOffset);
+            }
+            lastCodec.compress(data, inputOffset, data.length % CHUNK_SIZE, compressed, outputOffset);
+            compressed = Arrays.copyOf(compressed, outputOffset.intValue());
+            writeResultToFile(compressed, resultFile);
+
+        }else {
+            int[] recovered = new int[CHUNK_SIZE];
+
+            IntWrapper compOff = new IntWrapper(0);
+            IntWrapper recOffset;
+            int currentPos = 0;
+
+            while (compOff.get() < data.length) {
+                recOffset = new IntWrapper(0);
+                regularCodec.uncompress(data, compOff, data.length - compOff.get(), recovered, recOffset);
+
+                if (recOffset.get() < CHUNK_SIZE) {
+                    integratedVariableByte.uncompress(data, compOff, data.length - compOff.get(), recovered, recOffset);
+                }
+                currentPos += recOffset.get();
+            }
+            writeResultToFile(recovered, resultFile);
+        }
+        System.out.println("END");
     }
 
     private static void writeResultToFile(int[] result, String resultFilename) throws IOException {
