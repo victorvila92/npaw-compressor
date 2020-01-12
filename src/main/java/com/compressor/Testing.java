@@ -21,7 +21,6 @@ public class Testing {
         int[] data = getArrayFromFile(args[1]);
         String resultFile = args[2];
 
-
         Arrays.parallelSort(data);
 
         IntegratedIntegerCODEC regularCodec = new IntegratedBinaryPacking();
@@ -45,7 +44,6 @@ public class Testing {
 
             IntWrapper compOff = new IntWrapper(0);
             IntWrapper recOffset;
-            int currentPos = 0;
 
             while (compOff.get() < data.length) {
                 recOffset = new IntWrapper(0);
@@ -54,7 +52,6 @@ public class Testing {
                 if (recOffset.get() < CHUNK_SIZE) {
                     integratedVariableByte.uncompress(data, compOff, data.length - compOff.get(), recovered, recOffset);
                 }
-                currentPos += recOffset.get();
             }
             writeResultToFile(recovered, resultFile);
         }
@@ -77,8 +74,6 @@ public class Testing {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        //integerList.stream().filter(i -> Collections.frequency(integerList, i) > 1).collect(Collectors.toSet()).forEach(System.out::println);
 
         Stream<Integer> integerStream = integerList.stream();
         return integerStream.mapToInt(x -> x).toArray();
