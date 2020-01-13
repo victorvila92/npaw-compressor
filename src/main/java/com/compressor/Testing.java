@@ -1,8 +1,5 @@
 package com.compressor;
 
-import me.lemire.integercompression.*;
-import me.lemire.integercompression.differential.*;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,7 +20,7 @@ public class Testing {
 
         Arrays.parallelSort(data);
 
-        IntegratedIntegerCODEC regularCodec = new IntegratedBinaryPacking();
+/*        IntegratedIntegerCODEC regularCodec = new IntegratedBinaryPacking();
         IntegratedVariableByte integratedVariableByte = new IntegratedVariableByte();
         IntegratedIntegerCODEC lastCodec = new IntegratedComposition(regularCodec, integratedVariableByte);
 
@@ -54,7 +51,7 @@ public class Testing {
                 }
             }
             writeResultToFile(recovered, resultFile);
-        }
+        }*/
         System.out.println("END");
     }
 
