@@ -1,0 +1,16 @@
+
+fsquid:UnusedPrivateMethod|";Remove this unused private "findDuplicatesFromList" method.(‚ş´>8¡íÃ‘ú-
+Gsquid:S1148"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿ8¡íÃ‘ú-
+[squid:S1854">Remove this useless assignment to local variable "resultFile".(¨—Ø"8ßÁÏú-
+Lsquid:S1481"/Remove this unused "resultFile" local variable.(¨—Ø"8ßÁÏú-
+gsquid:UnusedPrivateMethod?"6Remove this unused private "getConsecutiveSet" method.(ığô¬øÿÿÿÿ8ßÁÏú-
+Lsquid:S1481".Remove this unused "parameter" local variable.(© ˜8§Å¶æù-
+Msquid:S00108F")Either remove or fill this block of code.(ÔöÆüÿÿÿÿ8ßÁÏú-
+[squid:S1854"=Remove this useless assignment to local variable "parameter".(© ˜8§Å¶æù-
+V
+squid:S1063"9Replace this use of System.out or System.err by a logger.(¨¹®œ8øìùú-
+bsquid:UnusedPrivateMethod6"6Remove this unused private "removeFromDataSet" method.(–Ìİà8„ô©‘ú-
+rsquid:UnusedPrivateMethod†"@Remove this unused private "getIntegerArrayListFromFile" method.(×•ûœşÿÿÿÿ8¡íÃ‘ú-
+Fsquid:S1148u"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿ8¡íÃ‘ú-
+bsquid:UnusedPrivateMethodg"6Remove this unused private "writeResultToFile" method.(­Ì§ï8¡íÃ‘ú-
+isquid:CommentedOutCodeLine1"<This block of commented-out lines of code should be removed.(Ú›ŞÑ8©¥® ú-
