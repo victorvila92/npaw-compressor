@@ -1,63 +1,83 @@
 package com.compressor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import com.google.common.base.Joiner;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Testing {
 
-    private static final int CHUNK_SIZE = 16384;
-    
-    public static void main(String[] args) throws IOException {
+    private static final Integer TIMES = 800;
+    private static HashMap<Integer, Integer> repeatedSet = new HashMap<>();
+    private static HashMap<Integer, Integer> consSet = new HashMap<>();
+    private static Set<Integer> dataSet = new HashSet<>();
 
+    public static void main(String[] args) {
         String parameter = args[0];
-        int[] data = getArrayFromFile(args[1]);
         String resultFile = args[2];
 
+        int[] data = getArrayFromFile(args[1]);
+
         Arrays.parallelSort(data);
+        dataSet = Arrays.stream(data).boxed().collect(Collectors.toSet());
 
-/*        IntegratedIntegerCODEC regularCodec = new IntegratedBinaryPacking();
-        IntegratedVariableByte integratedVariableByte = new IntegratedVariableByte();
-        IntegratedIntegerCODEC lastCodec = new IntegratedComposition(regularCodec, integratedVariableByte);
+        List<Callable> tasks = new ArrayList<>(Collections.singletonList(getRepeatedNumbersTask(data)));
+        for (int i = 1; i <= TIMES; i++){
+            tasks.add(getConsecutiveNumbersTask(data, i));
+        }
 
-        if (parameter.equals("-c")){
-            int[] compressed = new int[data.length];
+        try {
+            writeResultToFile(dataSet, repeatedSet, consSet, resultFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            IntWrapper inputOffset = new IntWrapper(0);
-            IntWrapper outputOffset = new IntWrapper(0);
-            for (int k = 0; k < data.length / CHUNK_SIZE; ++k){
-                regularCodec.compress(data, inputOffset, CHUNK_SIZE, compressed, outputOffset);
-            }
-            lastCodec.compress(data, inputOffset, data.length % CHUNK_SIZE, compressed, outputOffset);
-            compressed = Arrays.copyOf(compressed, outputOffset.intValue());
-            writeResultToFile(compressed, resultFile);
-
-        }else {
-            int[] recovered = new int[CHUNK_SIZE];
-
-            IntWrapper compOff = new IntWrapper(0);
-            IntWrapper recOffset;
-
-            while (compOff.get() < data.length) {
-                recOffset = new IntWrapper(0);
-                regularCodec.uncompress(data, compOff, data.length - compOff.get(), recovered, recOffset);
-
-                if (recOffset.get() < CHUNK_SIZE) {
-                    integratedVariableByte.uncompress(data, compOff, data.length - compOff.get(), recovered, recOffset);
-                }
-            }
-            writeResultToFile(recovered, resultFile);
-        }*/
         System.out.println("END");
     }
 
-    private static void writeResultToFile(int[] result, String resultFilename) throws IOException {
-        String resultString = Arrays.toString(Arrays.stream(result).mapToObj(String::valueOf).toArray(String[]::new)).replace("[","").replace("]","").replace(" ","");
-        Files.write(Paths.get(resultFilename), resultString.getBytes());
+    static Callable getRepeatedNumbersTask(int[] datasetArray) {
+        int previous = 0;
+        for (int number : datasetArray) {
+            if (previous == 0){
+                previous = number;
+            }else if(previous == number) {
+                repeatedSet.put(number, 0);
+            } else {
+                previous = number;
+            }
+        }
+        return () -> repeatedSet;
+    }
+
+    static Callable getConsecutiveNumbersTask(int[] datasetArray, int consecutiveNumber) {
+
+        int previous = 0;
+        Set<Integer> tempSet = new HashSet<>();
+
+        for (Integer number : datasetArray){
+            if(previous + consecutiveNumber == number) {
+                consSet.putIfAbsent(previous, consecutiveNumber);
+                tempSet.add(previous);
+                tempSet.add(number);
+            }
+            previous = number;
+        }
+        dataSet.removeAll(tempSet);
+        return () -> consSet;
+    }
+
+    private static void writeResultToFile(Set<Integer> dataSet, HashMap<Integer, Integer> repeatedSet, HashMap<Integer, Integer> consSet, String resultFilename) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        String dataSetString = dataSet.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String repeatedString = Joiner.on(",").withKeyValueSeparator(",").join(repeatedSet);
+        String consString = Joiner.on(",").withKeyValueSeparator(",").join(consSet);
+        sb.append(dataSetString).append(repeatedString).append(consString);
+        Files.write(Paths.get(resultFilename), Collections.singleton(sb.toString()));
     }
 
     private static int[] getArrayFromFile(String inputFile) {
@@ -74,16 +94,6 @@ public class Testing {
 
         Stream<Integer> integerStream = integerList.stream();
         return integerStream.mapToInt(x -> x).toArray();
-    }
-
-    private synchronized  Set<Integer> findDuplicatesFromList(List<Integer> integerList){
-        Set<Integer> tempSet = new HashSet<>();
-        Set<Integer> duplicates = new HashSet<>();
-
-        integerList.forEach(number -> {
-            if (!tempSet.add(number)) duplicates.add(number);
-        });
-        return duplicates;
     }
 }
 
