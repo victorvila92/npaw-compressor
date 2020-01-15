@@ -6,10 +6,13 @@ import org.junit.runners.MethodSorters;
 
 import java.io.File;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CompressorTest {
+
+    private static final String ORIGINAL_FILENAME = "integers";
 
     @Test(expected = CommandLineArgumentException.class)
     public void wrongArgumentOperation() throws Exception {
@@ -24,7 +27,7 @@ public class CompressorTest {
 
     @Test
     public void compressionWorking() throws Exception {
-        String initialFileName = "integers";
+        String initialFileName = ORIGINAL_FILENAME;
         String compressedFileName = "compressed";
 
         String[] args = {"-c", initialFileName, compressedFileName};
@@ -46,10 +49,13 @@ public class CompressorTest {
         Compressor.main(args);
         File initialFile = new File(initialFileName);
         File decompressedFile = new File(decompressedFileName);
+        File originalFile = new File(ORIGINAL_FILENAME);
 
         assertTrue(initialFile.exists());
         assertTrue(decompressedFile.exists());
+        assertTrue(originalFile.exists());
         assertTrue(initialFile.length() < decompressedFile.length());
+        assertEquals(originalFile.length(), decompressedFile.length());
         assertTrue(decompressedFile.delete());
     }
 }

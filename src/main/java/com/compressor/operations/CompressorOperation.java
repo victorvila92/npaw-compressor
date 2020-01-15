@@ -27,7 +27,7 @@ public class CompressorOperation {
     }
 
     public static void writeArrayToFile(int[] originalData, String resultFile) throws IOException {
-        Files.write(Paths.get(resultFile), Collections.singleton(Arrays.toString(originalData).trim().replace("]","").replace("[","")));
+        Files.write(Paths.get(resultFile), Collections.singleton(Arrays.toString(originalData).replace(" ","").replace("]","").replace("[","")));
     }
 
     public static int[] getIntegerArrayFromByteArray(byte[] result){
